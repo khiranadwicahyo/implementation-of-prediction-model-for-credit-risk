@@ -23,9 +23,6 @@ Sebagai Data Scientist intern di ID/X Partners, dalam sebuah proyek dari perusah
 Tugas proyek ini adalah mengembangkan model machine learning yang dapat memprediksi risiko kredit (credit risk) berdasarkan dataset yang disediakan, yang mencakup data pinjaman yang disetujui dan ditolak. Dalam pengembangan modelnya juga perlu melakukan beberapa tahap dimulai dengan Data Understanding, Exploratory Data Analysis (EDA), Data Preparation, Data Modelling, dan Evaluation.
 
 
-## Penting!!
-Jika ingin membutuhkan data yang saya pakai silahkan hubungi kontak dibawah ini.
 
-contact: ranamain28@gmail.com
 
-terima kasih, Khirana Dwicahyo
+Terima Kasih, Khirana Dwicahyo
