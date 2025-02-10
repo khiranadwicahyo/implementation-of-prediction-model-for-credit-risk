@@ -1,5 +1,5 @@
 # implementation-of-prediction-model-for-credit-risk
-Final task for project based internship in Rakamin x ID/X Partners
+[Final task] Data Scientist project based internship at ID/X Partners x Rakamin Academy
 ----------------------------
 ## About Company
 Id/x partners didirikan pada tahun 2002 oleh para mantan bankir dan konsultan manajemen yang memiliki pengalaman luas dalam siklus kredit dan manajemen proses, pengembangan penilaian, dan manajemen kinerja. Gabungan pengalaman kami telah melayani perusahaan-perusahaan di seluruh wilayah Asia dan Australia dan di berbagai industri, khususnya jasa keuangan, telekomunikasi, manufaktur, dan ritel. 
