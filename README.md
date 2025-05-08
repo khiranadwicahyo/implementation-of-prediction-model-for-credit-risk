@@ -26,11 +26,10 @@ Tugas proyek ini adalah mengembangkan model machine learning yang dapat mempredi
 
 
 ### Folder
-    ├── Data/ # 
-    ├── src code/ # Notebook for EDA, Modelling and Evaluation
-    ├── models/ # Model 
-    ├── outputs/ # Visualisation result
-    └── README.md # Docomentation
+    ├── data/ # berisi datasets 
+    ├── outputs/ # visualisai hasil sebelum SMOTE
+    ├── src code/ # source code Final_Task
+    └── README.md # Dokumentasi
 
 ### Library
 
@@ -84,9 +83,27 @@ Numberik :
     }
 
 ## Evaluation
+### Confusion Matrix
+*Hasil Confusion Matrix Menggunakan SMOTE Oversampling*
+![Hasil Confusion Matrix Menggunakan SMOTE Oversampling](outputs/Hasil%20Confusion%20Matrix%20SMOTE%20Oversampling.png)
+
+*Hasil Confusion Matrix Sebelum SMOTE Oversampling*
+![Hasil Confusion Matrix sebelum SMOTE](outputs/Hasil%20Confusion%20Matrix%20tanpa%20SMOTE%20Oversampling.png)
+
 Jika dibandingkan nilai confusion matrix pada model dengan akurasi dan presisi yang tinggi yaitu Logistic Regression dan Random Forest sangat jauh dibandingkan dengan menggunakan SMOTE, terlihat bahwa model masih tidak memiliki nilai yang baik dalam memprediksi pinjaman yang berisiko dan tidak berisiko.
 
+### Feature Importance
+*Hasil Feature Importance Antara XGBoost dan Random Forest*
+
+*XGBoost*
+![Hasil Feature Importance](outputs/Hasil%20Feature%20Importance%20XGB.png)
+*Random Forest*
+![Hasil Feature Importance](outputs/Hasil%20Feature%20Importance%20RF.png)
 Pada kedua model fitur yang sangat penting dalam pemodelan terdapat pada fitur **Recoveries**.
 
 ## Conclusion
 Antara akurasi dan presisi dalam model ini dapat dilihat dari bagaimana XGBoost lebih baik dalam menyeimbangkan presisi dan recall dibandingkan Random Forest. XGBoost memiliki FP dan FN yang lebih kecil, sehingga memberikan akurasi keseluruhan yang lebih tinggi. Namun, jika kita ingin menyesuaikan model sesuai kebutuhan bisnis—misalnya lebih fokus pada recall agar tidak terlalu banyak pinjaman buruk yang lolos—kita bisa menyesuaikan threshold atau menggunakan metode balancing tambahan."
+
+5 Februari 2025
+
+Khirana Dwicahyo,.
