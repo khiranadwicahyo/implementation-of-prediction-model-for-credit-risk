@@ -7,6 +7,8 @@
 > yang belum selesai dilabeli "tidak berisiko". Versi 2 membuktikan sumber kebocoran tersebut, membangun ulang pipeline dengan benar,
 > dan mengevaluasi model dengan metrik serta sudut pandang bisnis yang lazim di credit scoring.
 > Hasilnya ROC-AUC **0,656** pada data out-of-time. Angka ini jauh lebih rendah, tetapi jujur.
+>
+> **Dashboard interaktif:** https://credit-risk-model-implementation-khirana.streamlit.app/
 
 ---
 
@@ -104,6 +106,8 @@ Fitur terpenting kini masuk akal secara bisnis: suku bunga, pendapatan tahunan, 
 dan tujuan pinjaman. Bandingkan dengan versi 1, yang fitur terpentingnya `recoveries`.
 
 ## Dashboard Streamlit
+**Coba langsung:** https://credit-risk-model-implementation-khirana.streamlit.app/
+
 Folder `app/` berisi dashboard interaktif berbahasa Indonesia dengan empat halaman:
 
 - **Kalkulator Risiko**: isi data pengajuan, lalu dashboard menampilkan probabilitas gagal bayar, kategori risiko, dan faktor pendorongnya (SHAP per peminjam).

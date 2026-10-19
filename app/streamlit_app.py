@@ -248,16 +248,13 @@ def page_calculator():
     with right:
         with st.container(border=True):
             st.markdown('**Hasil prediksi**')
-            c1, c2 = st.columns([1, 1.2])
-            c1.metric('Probabilitas gagal bayar (PD)', pct(p), border=False)
-            with c2:
-                st.badge(f'Risiko {band}', icon=icon, color=color)
-                st.caption(band_text)
+            st.metric('Probabilitas gagal bayar (PD)', pct(p), border=False)
+            st.badge(f'Risiko {band}', icon=icon, color=color)
+            st.caption(band_text)
             st.progress(min(p / 0.5, 1.0), text=f'Lebih berisiko daripada {pctile:.0f}% pemohon di data uji')
-            c1, c2, c3 = st.columns(3)
-            c1.metric('Decile risiko', f'{decile} / 10', border=True)
-            c2.metric('Bad rate aktual decile ini', pct(dec_bad), border=True)
-            c3.metric('Rata-rata portofolio', pct(BASE_BAD), border=True)
+            st.markdown(f'- **Decile risiko:** {decile} dari 10\n'
+                        f'- **Bad rate aktual di decile ini:** {pct(dec_bad)}\n'
+                        f'- **Rata-rata bad rate portofolio:** {pct(BASE_BAD)}')
             decision = 'Tolak' if p >= TH['profit'] else 'Setujui'
             st.caption(f'Keputusan pada threshold profit-optimal ({num(TH["profit"])}): **{decision}**. '
                        f'Break-even PD: {num(TH["breakeven_pd"])}. Atur threshold sendiri di halaman *Simulasi Threshold*.')
