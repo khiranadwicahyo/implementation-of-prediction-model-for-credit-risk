@@ -1,0 +1,8 @@
+# Versi dikunci agar model (credit_risk_model_v2.joblib) bisa dimuat persis seperti saat disimpan
+streamlit==1.66.0
+pandas==3.0.5
+numpy==2.5.3
+scikit-learn==1.9.1
+xgboost-cpu==3.4.1
+joblib==1.6.0
+altair==6.3.0

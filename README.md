@@ -103,6 +103,16 @@ Model memisahkan risiko dengan jelas: bad rate decile skor tertinggi **25,2%**, 
 Fitur terpenting kini masuk akal secara bisnis: suku bunga, pendapatan tahunan, utilisasi kredit bergulir, jumlah inquiry kredit 6 bulan terakhir,
 dan tujuan pinjaman. Bandingkan dengan versi 1, yang fitur terpentingnya `recoveries`.
 
+## Dashboard Streamlit
+Folder `app/` berisi dashboard interaktif berbahasa Indonesia dengan empat halaman:
+
+- **Kalkulator Risiko**: isi data pengajuan, lalu dashboard menampilkan probabilitas gagal bayar, kategori risiko, dan faktor pendorongnya (SHAP per peminjam).
+- **Simulasi Threshold**: geser threshold dan lihat dampaknya pada approval rate, bad rate, recall, dan arus kas bersih.
+- **Ringkasan Model**: metrik out-of-time, cerita audit leakage (99% → 0,656), bad rate per decile, dan fitur terpenting.
+- **Kamus Fitur**: deskripsi setiap fitur berdasarkan data dictionary Lending Club, cara pengolahannya, dan kolom yang tidak dipakai beserta alasannya.
+
+Dashboard tidak membutuhkan dataset mentah. Skor data uji sudah diringkas di `app/data/` oleh `app/prepare_app_data.py`.
+
 ## Keterbatasan
 - **Bias seleksi:** data hanya berisi pinjaman yang disetujui, sehingga perlu *reject inference* untuk dipakai pada seluruh pemohon.
 - **Cakupan:** tenor 36 bulan, 2007–2012. Populasi sudah bergeser di periode uji (bad rate 12,0% → 13,6%).
@@ -120,7 +130,14 @@ dan tujuan pinjaman. Bandingkan dengan versi 1, yang fitur terpentingnya `recove
     ├── src code/
     │   ├── Final_Task_IDX_Partners_Data_Scientist_KhiranaDwicahyo.ipynb   # versi 1 (arsip)
     │   └── credit_risk_model_v2.ipynb                                     # versi 2
-    ├── requirements.txt
+    ├── app/
+    │   ├── streamlit_app.py                    # dashboard
+    │   ├── features.py                         # transformasi fitur (identik dengan notebook)
+    │   ├── prepare_app_data.py                 # membuat data ringkas untuk dashboard
+    │   ├── data/                               # skor data uji & ringkasan model
+    │   └── requirements.txt                    # dependensi dashboard (versi dikunci)
+    ├── .streamlit/config.toml
+    ├── requirements.txt                        # dependensi notebook
     └── README.md
 
 ## Cara Menjalankan
@@ -131,6 +148,12 @@ cd "src code"
 jupyter notebook credit_risk_model_v2.ipynb
 ```
 Notebook berjalan ±3 menit (2 CPU) dan akan membuat ulang semua isi `outputs/v2/`.
+
+Menjalankan dashboard secara lokal:
+```bash
+pip install -r app/requirements.txt
+streamlit run app/streamlit_app.py
+```
 
 ---
 Khirana Dwicahyo. Versi 1: 5 Februari 2025. Versi 2 (revisi metodologi): Oktober 2026.
