@@ -1,0 +1,172 @@
+{
+  "cohort": {
+    "n_loans": 72521,
+    "bad_rate": 0.12636339818811104,
+    "train_n": 44063,
+    "test_n": 28458
+  },
+  "ablation": [
+    {
+      "Skenario": "A. Pipeline versi 1",
+      "Data uji": "sintetis (SMOTE)",
+      "Accuracy": 0.9929,
+      "Precision (berisiko)": 0.9996,
+      "Recall (berisiko)": 0.9863,
+      "ROC-AUC": 0.9995
+    },
+    {
+      "Skenario": "B. + SMOTE setelah split",
+      "Data uji": "asli",
+      "Accuracy": 0.988,
+      "Precision (berisiko)": 0.9951,
+      "Recall (berisiko)": 0.8963,
+      "ROC-AUC": 0.995
+    },
+    {
+      "Skenario": "C. + tanpa fitur pasca-pencairan",
+      "Data uji": "asli",
+      "Accuracy": 0.8889,
+      "Precision (berisiko)": 0.4158,
+      "Recall (berisiko)": 0.0041,
+      "ROC-AUC": 0.6913
+    }
+  ],
+  "cv_train": [
+    {
+      "Model": "XGBoost",
+      "ROC-AUC": 0.6792,
+      "ROC-AUC (std)": 0.0062,
+      "PR-AUC": 0.218,
+      "Brier score": 0.101
+    },
+    {
+      "Model": "XGBoost + scale_pos_weight",
+      "ROC-AUC": 0.6772,
+      "ROC-AUC (std)": 0.006,
+      "PR-AUC": 0.2173,
+      "Brier score": 0.2147
+    },
+    {
+      "Model": "Random Forest",
+      "ROC-AUC": 0.6734,
+      "ROC-AUC (std)": 0.0093,
+      "PR-AUC": 0.2129,
+      "Brier score": 0.1014
+    },
+    {
+      "Model": "Logistic Regression + class_weight",
+      "ROC-AUC": 0.6732,
+      "ROC-AUC (std)": 0.0052,
+      "PR-AUC": 0.2134,
+      "Brier score": 0.227
+    },
+    {
+      "Model": "Logistic Regression",
+      "ROC-AUC": 0.6732,
+      "ROC-AUC (std)": 0.0051,
+      "PR-AUC": 0.2137,
+      "Brier score": 0.1013
+    },
+    {
+      "Model": "Logistic Regression + SMOTE",
+      "ROC-AUC": 0.6677,
+      "ROC-AUC (std)": 0.0037,
+      "PR-AUC": 0.2094,
+      "Brier score": 0.2279
+    },
+    {
+      "Model": "XGBoost + SMOTE",
+      "ROC-AUC": 0.6657,
+      "ROC-AUC (std)": 0.0066,
+      "PR-AUC": 0.2048,
+      "Brier score": 0.1027
+    }
+  ],
+  "test_out_of_time": [
+    {
+      "Model": "XGBoost (final)",
+      "ROC-AUC": 0.6562,
+      "Gini": 0.3124,
+      "KS": 0.2307,
+      "PR-AUC": 0.2169,
+      "Brier score": 0.1137
+    },
+    {
+      "Model": "Logistic Regression",
+      "ROC-AUC": 0.6527,
+      "Gini": 0.3054,
+      "KS": 0.2268,
+      "PR-AUC": 0.213,
+      "Brier score": 0.1141
+    },
+    {
+      "Model": "Baseline: sub_grade saja",
+      "ROC-AUC": 0.6212,
+      "Gini": 0.2424,
+      "KS": 0.1768,
+      "PR-AUC": 0.186,
+      "Brier score": NaN
+    }
+  ],
+  "business": [
+    {
+      "Kebijakan": "Setujui semua (tanpa model)",
+      "Threshold": Infinity,
+      "Approval rate": 1.0,
+      "Bad rate disetujui": 0.1361,
+      "Gagal bayar tertolak (recall)": 0.0,
+      "Arus kas bersih (USD juta)": 35.8235,
+      "Selisih arus kas vs setujui semua": 0.0
+    },
+    {
+      "Kebijakan": "Profit-optimal (PD < 0.35)",
+      "Threshold": 0.35,
+      "Approval rate": 0.986,
+      "Bad rate disetujui": 0.1337,
+      "Gagal bayar tertolak (recall)": 0.0318,
+      "Arus kas bersih (USD juta)": 35.6011,
+      "Selisih arus kas vs setujui semua": -0.0062
+    },
+    {
+      "Kebijakan": "Cutoff 5% teratas (data latih)",
+      "Threshold": 0.255,
+      "Approval rate": 0.9158,
+      "Bad rate disetujui": 0.1248,
+      "Gagal bayar tertolak (recall)": 0.1606,
+      "Arus kas bersih (USD juta)": 33.8107,
+      "Selisih arus kas vs setujui semua": -0.0562
+    },
+    {
+      "Kebijakan": "Cutoff 10% teratas (data latih)",
+      "Threshold": 0.2141,
+      "Approval rate": 0.8361,
+      "Bad rate disetujui": 0.1157,
+      "Gagal bayar tertolak (recall)": 0.2891,
+      "Arus kas bersih (USD juta)": 31.1224,
+      "Selisih arus kas vs setujui semua": -0.1312
+    },
+    {
+      "Kebijakan": "Cutoff 20% teratas (data latih)",
+      "Threshold": 0.1713,
+      "Approval rate": 0.7022,
+      "Bad rate disetujui": 0.1013,
+      "Gagal bayar tertolak (recall)": 0.4773,
+      "Arus kas bersih (USD juta)": 26.5087,
+      "Selisih arus kas vs setujui semua": -0.26
+    }
+  ],
+  "top_features_shap": {
+    "int_rate": 0.30309998989105225,
+    "log_annual_inc": 0.2320999950170517,
+    "revol_util": 0.09989999979734421,
+    "inq_last_6mths": 0.0957999974489212,
+    "purpose_credit_card": 0.07119999825954437,
+    "sub_grade_num": 0.0674000009894371,
+    "open_acc": 0.052799999713897705,
+    "installment_to_income": 0.0502999983727932,
+    "emp_length_yrs": 0.04430000111460686,
+    "credit_hist_months": 0.04340000078082085,
+    "log_revol_bal": 0.039799999445676804,
+    "mths_since_last_delinq": 0.03970000147819519
+  }
+}

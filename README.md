@@ -1,109 +1,136 @@
-# implementation-of-prediction-model-for-credit-risk
+# Implementation of Prediction Model for Credit Risk
 
+[Final task] Data Scientist project-based internship ID/X Partners x Rakamin Academy. **Versi 2: revisi metodologi.**
 
-[Final task] Data Scientist project based internship at ID/X Partners x Rakamin Academy
-----------------------------
-## About Company
-Id/x partners didirikan pada tahun 2002 oleh para mantan bankir dan konsultan manajemen yang memiliki pengalaman luas dalam siklus kredit dan manajemen proses, pengembangan penilaian, dan manajemen kinerja. Gabungan pengalaman kami telah melayani perusahaan-perusahaan di seluruh wilayah Asia dan Australia dan di berbagai industri, khususnya jasa keuangan, telekomunikasi, manufaktur, dan ritel. 
+> **Ringkasan revisi.** Versi pertama project ini melaporkan akurasi 99,3%. Setelah diaudit, angka itu ternyata berasal dari
+> *data leakage*: ada fitur yang baru tercatat setelah pinjaman macet, SMOTE dijalankan sebelum train-test split, dan pinjaman
+> yang belum selesai dilabeli "tidak berisiko". Versi 2 membuktikan sumber kebocoran tersebut, membangun ulang pipeline dengan benar,
+> dan mengevaluasi model dengan metrik serta sudut pandang bisnis yang lazim di credit scoring.
+> Hasilnya ROC-AUC **0,656** pada data out-of-time. Angka ini jauh lebih rendah, tetapi jujur.
 
-Id/x partners menyediakan layanan konsultasi yang mengkhususkan diri dalam memanfaatkan solusi data analytic and decisioning (DAD) yang dikombinasikan dengan manajemen risiko dan disiplin pemasaran yang terintegrasi untuk membantu klien mengoptimalkan profitabilitas portofolio dan proses bisnis.
+---
 
-Layanan konsultasi yang komprehensif dan solusi teknologi yang ditawarkan oleh id/x partners menjadikannya sebagai penyedia layanan satu atap.
+## Latar Belakang
+ID/X Partners (berdiri 2002) adalah konsultan *data analytics and decisioning* untuk industri jasa keuangan, telekomunikasi, manufaktur, dan ritel di Asia dan Australia.
+Dalam project ini, klien (perusahaan pemberi pinjaman) ingin meningkatkan ketepatan penilaian risiko kredit agar keputusan pemberian pinjaman lebih baik dan potensi kerugian berkurang.
+Tugasnya adalah membangun model *machine learning* yang memprediksi risiko gagal bayar dari data pinjaman Lending Club 2007–2014 (466.285 baris, 75 kolom).
 
+## Audit Versi 1: dari mana akurasi 99% berasal?
 
-## Background Information
-Dalam industri keuangan, terutama pada lembaga pemberi pinjaman seperti bank atu fintech, penilaian risiko kredit merupakan aspek krusial dalam pengambilan keputusan. Pemberian pinjaman yang tidak terukur akan membuat banyak kerugian finansial dan kestabilan perusahaan. Oleh karena itu, pengendalian risiko pinjaman sangat penting untuk dilakukan agar dapat melakukan evaluasi kelayakan pinjaman.
+| # | Masalah di versi 1 | Perbaikan di versi 2 |
+|---|---|---|
+| 1 | SMOTE dijalankan **sebelum** train-test split, sehingga data uji berisi sampel sintetis | Split dulu. SMOTE (jika dipakai) hanya di data latih, di dalam pipeline |
+| 2 | Fitur pasca-pencairan ikut dipakai (`recoveries`, `total_rec_prncp`, `out_prncp`, `total_pymnt`, `last_pymnt_amnt`, dll.) | Hanya fitur yang diketahui saat pengajuan |
+| 3 | Target encoding dihitung dari seluruh data, termasuk data uji | One-hot encoding di dalam pipeline |
+| 4 | Status `Current` (±48% data, hasil akhir belum diketahui) dilabeli "tidak berisiko" | Hanya pinjaman 36 bulan yang sudah jatuh tempo |
+| 5 | `id`, `member_id`, `Unnamed: 0` menjadi fitur | Dibuang |
+| 6 | `fillna(0)` pada `mths_since_last_delinq`, sehingga "tidak pernah menunggak" terbaca "baru menunggak" | Flag + nilai batas 120 bulan |
+| 7 | Evaluasi dengan akurasi pada data seimbang hasil SMOTE | ROC-AUC, Gini, KS, PR-AUC, kalibrasi, analisis threshold |
 
-Untuk mengatasi tantangan ini, penerapan Machine Learning (ML) sangat diperlukan untuk dapat melakukan fungsi otomatisasi dalam melakukan evaluasi kredit dan meningkatkan akurasi. Dengan demikian, proyek ini bertujuan untuk membangun model machine learning yang mampu mengklasifikasikan risiko pinjaman secara lebih akurat, membantu lembaga keuangan dalam mengurangi kredit macet, serta mempercepat dan mengoptimalkan proses pengambilan keputusan dalam pemberian kredit.
+Contoh paling jelas: `recoveries` (uang yang ditagih **setelah** pinjaman dihapusbukukan) bernilai > 0 pada 56% pinjaman Charged Off dan **0%** pada semua status lain.
 
+**Eksperimen ablation**: model sama (XGBoost), kesalahan diperbaiki satu per satu.
 
+| Skenario | Data uji | Accuracy | Recall (berisiko) | ROC-AUC |
+|---|---|---|---|---|
+| A. Pipeline versi 1 | sintetis (SMOTE) | 0,993 | 0,986 | 0,999 |
+| B. + SMOTE setelah split | asli | 0,988 | 0,896 | 0,995 |
+| C. + tanpa fitur pasca-pencairan | asli | 0,889 | 0,004 | 0,691 |
 
-## Project
+Kesimpulan ablation: penyumbang kebocoran terbesar adalah **fitur pasca-pencairan**, bukan hanya SMOTE.
+Akurasi 0,889 pada skenario C hanya setara dengan menebak "semua tidak berisiko", sehingga akurasi bukan metrik yang tepat untuk kasus ini.
 
-Sebagai Data Scientist intern di ID/X Partners, dalam sebuah proyek dari perusahaan pemberi pinjaman (multifinance), dimana client ingin meningkatkan keakuratan dalam menilai dan mengelola risiko kredit, sehingga dapat mengoptimalkan keputusan bisnis mereka dan mengurangi potensi kerugian.
+## Metodologi Versi 2
 
-Tugas proyek ini adalah mengembangkan model machine learning yang dapat memprediksi risiko kredit (credit risk) berdasarkan dataset yang disediakan, yang mencakup data pinjaman yang disetujui dan ditolak. Dalam pengembangan modelnya juga perlu melakukan beberapa tahap dimulai dengan Data Understanding, Exploratory Data Analysis (EDA), Data Preparation, Data Modelling, dan Evaluation.
+1. **Target:** pinjaman tenor 36 bulan yang dicairkan Jun-2007 s/d Des-2012 dan sudah jatuh tempo per snapshot data (Jan-2016).
+   `1` = Charged Off / Default / Late 31–120 hari, `0` = Fully Paid. Total **72.521 pinjaman**, bad rate **12,6%**.
+2. **Fitur:** hanya yang tersedia saat pengajuan, yaitu data pengajuan (jumlah, suku bunga, sub-grade, tujuan, pendapatan, DTI, masa kerja) dan riwayat biro kredit
+   (inquiry, utilisasi kredit bergulir, tunggakan, catatan publik, panjang riwayat kredit), ditambah rasio turunan seperti `loan_to_income` dan `installment_to_income`.
+3. **Split out-of-time:** train = dicairkan sebelum Jul-2012 (44.063 pinjaman), test = Jul–Des 2012 (28.458 pinjaman).
+4. **Pipeline:** imputasi, scaling, one-hot encoding, dan SMOTE ada di dalam `Pipeline`, sehingga di setiap fold cross-validation semuanya hanya belajar dari data latih.
+5. **Seleksi model:** 5-fold cross-validation pada data latih untuk 7 kandidat (Logistic Regression, Random Forest, XGBoost, masing-masing dengan/tanpa class weight atau SMOTE).
+6. **Evaluasi akhir** pada data uji out-of-time, dilakukan sekali.
 
+## Hasil
 
-### Folder
-    ├── data/ # berisi datasets 
-    ├── outputs/ # visualisai hasil sebelum SMOTE
-    ├── src code/ # source code Final_Task
-    └── README.md # Dokumentasi
+**Cross-validation (data latih)**
 
-### Library
+| Model | ROC-AUC | PR-AUC | Brier score |
+|---|---|---|---|
+| **XGBoost** (terpilih) | **0,679** | **0,218** | **0,101** |
+| XGBoost + scale_pos_weight | 0,677 | 0,217 | 0,215 |
+| Random Forest | 0,673 | 0,213 | 0,101 |
+| Logistic Regression | 0,673 | 0,214 | 0,101 |
+| Logistic Regression + SMOTE | 0,668 | 0,209 | 0,228 |
+| XGBoost + SMOTE | 0,666 | 0,205 | 0,103 |
 
-* pandas
-* numpy
-* scikit-learn
-* SMOTE
-* XGB
-* matplotlib
-* seaborn
+SMOTE dan class weight **tidak menaikkan** ROC-AUC dan justru merusak kalibrasi probabilitas (Brier score memburuk). Karena itu, ketidakseimbangan kelas ditangani lewat pemilihan threshold.
 
-### Datasets
-Datasets yang digunakan dalam project ini adalah merupakah dataset yang berisi informasi mengenai pinjaman kredit, mulai dari jumlah pinjaman, total yang lunas dan belum lunas, hingga sisa pembayaran selanjutnya. 
+**Data uji out-of-time**
 
-Dimensi dataset ini terdapat 468225 baris dan 75 fitur dengan tipe data terdiri dari time series, kategorik, dan numberik yang diantaranya adalah :
+| Model | ROC-AUC | Gini | KS | PR-AUC |
+|---|---|---|---|---|
+| **XGBoost (final)** | **0,656** | **0,312** | **0,231** | **0,217** |
+| Logistic Regression | 0,653 | 0,305 | 0,227 | 0,213 |
+| Baseline: `sub_grade` saja | 0,621 | 0,242 | 0,177 | 0,186 |
 
-Time Series :
-* issue_d
-* earlist_cr_line
-* last_pymnt_d
-* next_pymnt_d
-* last_credit_pull_d
+![ROC, KS, kalibrasi](outputs/v2/02_roc_ks_calibration.png)
 
-Kategorik :
-* term
-* grade
-* sub_grade
-* loan_status
-* home_ownership
-* application_type
-* purpose
-* intial_list_status
+Model memisahkan risiko dengan jelas: bad rate decile skor tertinggi **25,2%**, sedangkan decile terendah **4,5%**.
 
-Numberik :
-* funded_amnt
-* last_pymnt_amnt
-* total_pymnt_amnt
-* total_pymnt_inv
-* total_pymnt
-* total_rec_int
-* tot_cur_bal
-* tot_coll_amnt
+![Bad rate per decile](outputs/v2/03_bad_rate_by_decile.png)
 
-### Model
-    models = {
-        "Decision Tree": DecisionTreeClassifier(),
-        "Random Forest": RandomForestClassifier(n_estimators=50),
-        "XGBoost": xgb.XGBClassifier(use_label_encoder=False, eval_metric='logloss', n_estimators=100),
-        "AdaBoost": AdaBoostClassifier(n_estimators=50),
-        "Logistic Regression": LogisticRegression(solver='saga', penalty='l2', C=10, max_iter=500)
-    }
+## Dampak Bisnis
 
-## Evaluation
-### Confusion Matrix
-*Hasil Confusion Matrix Menggunakan SMOTE Oversampling*
-![Hasil Confusion Matrix Menggunakan SMOTE Oversampling](outputs/Hasil%20Confusion%20Matrix%20SMOTE%20Oversampling.png)
+| Kebijakan (data uji) | Approval rate | Bad rate disetujui | Gagal bayar tertolak | Arus kas bersih |
+|---|---|---|---|---|
+| Setujui semua | 100% | 13,6% | 0% | USD 35,8 jt |
+| Profit-optimal (PD < 0,35) | 98,6% | 13,4% | 3,2% | USD 35,6 jt (−0,6%) |
+| Cutoff 10% (dari data latih) | 83,6% | 11,6% | 28,9% | USD 31,1 jt (−13,1%) |
+| Cutoff 20% (dari data latih) | 70,2% | 10,1% | 47,7% | USD 26,5 jt (−26,0%) |
 
-*Hasil Confusion Matrix Sebelum SMOTE Oversampling*
-![Hasil Confusion Matrix sebelum SMOTE](outputs/Hasil%20Confusion%20Matrix%20tanpa%20SMOTE%20Oversampling.png)
+![Threshold dan dampak bisnis](outputs/v2/04_threshold_business.png)
 
-Jika dibandingkan nilai confusion matrix pada model dengan akurasi dan presisi yang tinggi yaitu Logistic Regression dan Random Forest sangat jauh dibandingkan dengan menggunakan SMOTE, terlihat bahwa model masih tidak memiliki nilai yang baik dalam memprediksi pinjaman yang berisiko dan tidak berisiko.
+- Pinjaman di data ini **sudah disetujui dan sudah diberi harga sesuai risiko** oleh Lending Club. Pinjaman baru merugi jika PD-nya di atas **0,28**,
+  dan hanya ±6% pengajuan yang melewati batas itu. Karena itu, aturan tolak berbasis profit hampir tidak mengubah arus kas.
+- Model bisa **menekan bad rate** sesuai risk appetite (13,6% → 11,6%), dengan biaya volume dan pendapatan bunga yang hilang.
+- Cutoff dari persentil data latih menolak ±16% (bukan 10%) di data uji, karena skor bergeser naik. Ini alasan model perlu dimonitor, misalnya dengan PSI.
+- Nilai utama model ini adalah **estimasi PD yang terkalibrasi** untuk pricing, expected loss, dan pengendalian risk appetite.
 
-### Feature Importance
-*Hasil Feature Importance Antara XGBoost dan Random Forest*
+## Fitur Terpenting (SHAP)
+![SHAP importance](outputs/v2/05_shap_importance.png)
 
-*XGBoost*
-![Hasil Feature Importance](outputs/Hasil%20Feature%20Importance%20XGB.png)
-*Random Forest*
-![Hasil Feature Importance](outputs/Hasil%20Feature%20Importance%20RF.png)
-Pada kedua model fitur yang sangat penting dalam pemodelan terdapat pada fitur **Recoveries**.
+Fitur terpenting kini masuk akal secara bisnis: suku bunga, pendapatan tahunan, utilisasi kredit bergulir, jumlah inquiry kredit 6 bulan terakhir,
+dan tujuan pinjaman. Bandingkan dengan versi 1, yang fitur terpentingnya `recoveries`.
 
-## Conclusion
-Antara akurasi dan presisi dalam model ini dapat dilihat dari bagaimana XGBoost lebih baik dalam menyeimbangkan presisi dan recall dibandingkan Random Forest. XGBoost memiliki FP dan FN yang lebih kecil, sehingga memberikan akurasi keseluruhan yang lebih tinggi. Namun, jika kita ingin menyesuaikan model sesuai kebutuhan bisnis—misalnya lebih fokus pada recall agar tidak terlalu banyak pinjaman buruk yang lolos—kita bisa menyesuaikan threshold atau menggunakan metode balancing tambahan."
+## Keterbatasan
+- **Bias seleksi:** data hanya berisi pinjaman yang disetujui, sehingga perlu *reject inference* untuk dipakai pada seluruh pemohon.
+- **Cakupan:** tenor 36 bulan, 2007–2012. Populasi sudah bergeser di periode uji (bad rate 12,0% → 13,6%).
+- **Perhitungan bisnis disederhanakan:** tanpa diskonto, biaya dana, dan biaya operasional.
 
-5 Februari 2025
+## Struktur Folder
+    ├── data/
+    │   ├── LCDataDictionary.csv
+    │   └── loan_data_2007_2014.csv            # tidak di-commit (±240 MB), unduh terpisah
+    ├── outputs/
+    │   ├── *.png                               # grafik versi 1
+    │   └── v2/                                 # grafik, metrik, dan model versi 2
+    │       ├── credit_risk_model_v2.joblib     # pipeline final + threshold
+    │       └── metrics_v2.json
+    ├── src code/
+    │   ├── Final_Task_IDX_Partners_Data_Scientist_KhiranaDwicahyo.ipynb   # versi 1 (arsip)
+    │   └── credit_risk_model_v2.ipynb                                     # versi 2
+    ├── requirements.txt
+    └── README.md
 
-Khirana Dwicahyo,.
+## Cara Menjalankan
+```bash
+pip install -r requirements.txt
+# letakkan loan_data_2007_2014.csv di folder data/
+cd "src code"
+jupyter notebook credit_risk_model_v2.ipynb
+```
+Notebook berjalan ±3 menit (2 CPU) dan akan membuat ulang semua isi `outputs/v2/`.
+
+---
+Khirana Dwicahyo. Versi 1: 5 Februari 2025. Versi 2 (revisi metodologi): Oktober 2026.

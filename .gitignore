@@ -1,0 +1,6 @@
+# dataset mentah (±240 MB, melebihi batas file GitHub)
+data/loan_data_2007_2014.csv
+# artefak training
+src code/catboost_info/
+.ipynb_checkpoints/
+__pycache__/
